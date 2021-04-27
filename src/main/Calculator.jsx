@@ -3,11 +3,19 @@ import './Calculator.css'
 import Button from '../components/Button'
 import Display from '../components/Display'
 
+// const initialState = {
+//     displayValue: '0', //Valor inicial do Display
+//     clearDisplay: false, //Verifica se o Display precisa ser Limpo
+//     operation: null, //Valor da Operação + - / *
+//     values: [0, 0], //Array de armazenamento de valores n1 e n2  
+//     index: 0
+// };
+
 const initialState = {
-    displayValue: '0', //Valor inicial do Display
-    clearDisplay: false, //Verifica se o Display precisa ser Limpo
-    operation: null, //Valor da Operação + - / *
-    values: [0, 0], //Array de armazenamento de valores n1 e n2  
+    displayValue: '0', 
+    clearDisplay: false, 
+    operation: null, 
+    values: [0, 0],
     index: 0
 };
 
@@ -17,10 +25,10 @@ export default class Calculator extends Component {
 
     constructor(props){
         super(props)
-
+        
         this.clearMemoty = this.clearMemoty.bind(this)
         this.setOperation = this.setOperation.bind(this)
-        this.addDigit = this.setOperation.bind(this)
+        this.addDigit = this.addDigit.bind(this)
     }
 
     clearMemoty(){
@@ -28,7 +36,56 @@ export default class Calculator extends Component {
     }
 
     setOperation(operation){
-        console.log(operation)
+        if(this.state.index === 0){
+            this.setState({ operation, index: 1, clearDisplay: true})
+        }else{
+            const equals = operation === '='
+            const currentOperation = this.state.operation
+            const values = [...this.state.values]
+
+            //values[0] = eval(`${values[0]} ${currentOperation} ${values[1]}`)
+
+            switch (currentOperation) {
+                case '+':
+                    values[0] = values[0] + values[1]
+                    values[1] = 0
+                break;
+
+                case '-':
+                    values[0] = values[0] - values[1]
+                    values[1] = 0
+                break;
+
+                case '*':
+                    values[0] = values[0] * values[1]
+                    values[1] = 0
+                break;
+
+                case '/':  
+                    if(values[1] === 0){
+                        values[0] = 'Error'
+                    }else if(values[0] === 0 && values[1] === 0){
+                        values[0] = 'Undefined'
+                    }else{
+                        values[0] = values[0] / values[1]
+                        values[1] = 0
+                    }
+                break;
+            
+                default:
+                break;
+            }
+
+            this.setState({
+                displayValue: values[0],
+                operation: equals ? null : operation,
+                index: equals ? 0 : 1,
+                clearDisplay: !equals,
+                values
+            })
+        }
+
+
     }
 
     addDigit(n){
@@ -41,6 +98,16 @@ export default class Calculator extends Component {
         const displayValue = currentValue + n
 
         this.setState({ displayValue, clearDisplay: false })
+
+        if(n !== '.'){
+            const i = this.state.index
+            const newValue = parseFloat(displayValue)
+            const values = [...this.state.values]
+
+            values[i] = newValue
+            this.setState({ values })
+            console.log(values)
+        }
     }
 
     render(){
